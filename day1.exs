@@ -1,3 +1,4 @@
+#!/usr/bin/env elixir
 chomp = fn s -> String.replace_suffix(s, "\n", "") end
 input = chomp.(File.read!("input/day1.txt"))
 input_per_elf = String.split(input, "\n\n")

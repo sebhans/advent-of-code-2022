@@ -1,3 +1,4 @@
+#!/usr/bin/env elixir
 chomp = fn s -> String.replace_suffix(s, "\n", "") end
 input = chomp.(File.read!("input/day2.txt"))
 input_rounds = Enum.map(String.split(input, "\n"), &(String.split(&1, " ")))
