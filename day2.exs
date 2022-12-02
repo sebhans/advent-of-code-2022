@@ -1,6 +1,9 @@
 chomp = fn s -> String.replace_suffix(s, "\n", "") end
 input = chomp.(File.read!("input/day2.txt"))
-strategy_guide_key = %{"A" => :rock, "B" => :paper, "C" => :scissors, "X" => :rock, "Y" => :paper, "Z" => :scissors}
+input_rounds = Enum.map(String.split(input, "\n"), &(String.split(&1, " ")))
+strategy_guide_guessed_key = %{"A" => :rock, "B" => :paper, "C" => :scissors, "X" => :rock, "Y" => :paper, "Z" => :scissors}
+interpret = fn key -> fn [abc, xyz] -> {key[abc], key[xyz]} end end
+guessed_rounds = Enum.map(input_rounds, interpret.(strategy_guide_guessed_key))
 score = %{
   {:rock, :rock} => 4,
   {:rock, :paper} => 8,
@@ -12,5 +15,4 @@ score = %{
   {:scissors, :paper} => 2,
   {:scissors, :scissors} => 6
 }
-rounds = Enum.map(Enum.map(String.split(input, "\n"), &(String.split(&1, " "))), fn [abc, xyz] -> {strategy_guide_key[abc], strategy_guide_key[xyz]} end)
-IO.puts(Enum.sum(Enum.map(rounds, &(score[&1]))))
+IO.puts(Enum.sum(Enum.map(guessed_rounds, &(score[&1]))))
