@@ -11,3 +11,7 @@ prioritize = fn
   item when item >= ?A and item <= ?Z -> item - ?A + 27
 end
 IO.puts(Enum.sum(Enum.map(wrong_items, prioritize)))
+
+groups = Enum.chunk_every(Enum.map(String.split(input, "\n"), ruffle), 3)
+badges = Enum.map(groups, fn [a, b, c] -> hd(Map.keys(intersect.(intersect.(a, b), c))) end)
+IO.puts(Enum.sum(Enum.map(badges, prioritize)))
