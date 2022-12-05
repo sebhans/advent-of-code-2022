@@ -21,5 +21,9 @@ instructions = Enum.map(Enum.map(procedure, &(Regex.run(~r/move ([0-9]+) from ([
 move = fn stacks, from, to -> Map.replace(Map.replace(stacks, from, Enum.drop(stacks[from], 1)), to, [List.first(stacks[from]) | stacks[to]]) end
 apply = fn [count, from, to], stacks -> Enum.reduce(1..count, stacks, fn _, stacks -> move.(stacks, from, to) end) end
 final_stacks = Enum.reduce(instructions, initial_stacks, &(apply.(&1, &2)))
-top_crates = Enum.map(1..num_stacks, &(List.first(final_stacks[&1])))
-IO.puts(top_crates)
+top_crates = fn stacks -> Enum.map(1..num_stacks, &(List.first(stacks[&1]))) end
+IO.puts(top_crates.(final_stacks))
+
+apply9001 = fn [count, from, to], stacks -> Map.replace(Map.replace(stacks, from, Enum.drop(stacks[from], count)), to, Enum.take(stacks[from], count) ++ stacks[to]) end
+final_stacks9001 = Enum.reduce(instructions, initial_stacks, &(apply9001.(&1, &2)))
+IO.puts(top_crates.(final_stacks9001))
