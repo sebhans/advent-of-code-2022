@@ -40,3 +40,8 @@ dir_sizes = Dir.dfs(dir_tree, fn
     {:dir, [{name, size} | Enum.flat_map(entries, &(elem(&1, 1)))], size}
 end) |> elem(1)
 IO.inspect(dir_sizes |> Enum.map(&(elem(&1, 1))) |> Enum.filter(&(&1 <= 100000)) |> Enum.sum())
+
+total_used_space = dir_sizes |> Enum.find(fn {name, _} -> name == "/" end) |> elem(1)
+free_space = 70000000 - total_used_space
+required_space = 30000000 - free_space
+IO.inspect(dir_sizes |> List.keysort(1) |> Enum.find(fn {_, size} -> size >= required_space end) |> elem(1))
