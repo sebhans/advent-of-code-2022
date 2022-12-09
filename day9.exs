@@ -27,3 +27,6 @@ trailing_positions = fn leader_positions ->
 end
 tail_positions = trailing_positions.(head_positions)
 IO.inspect(tail_positions |> Enum.uniq |> length)
+
+tail9_positions = Enum.reduce(2..9, tail_positions, fn _, prev -> trailing_positions.(prev) end)
+IO.inspect(tail9_positions |> Enum.uniq |> length)
