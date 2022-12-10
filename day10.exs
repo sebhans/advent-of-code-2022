@@ -31,3 +31,11 @@ signal_strength = (CPU.run(instructions)
   |> Stream.map(fn {x, n} -> x * n end)
   |> Enum.sum)
 IO.inspect(signal_strength)
+
+CPU.run(instructions)
+|> Stream.each(fn
+  {x, n} when abs(x - rem(n-1, 40)) <= 1 -> IO.write("#")
+  _ -> IO.write(".")
+end)
+|> Stream.each(fn {_, n} -> if rem(n, 40)==0, do: IO.write("\n") end)
+|> Stream.run
