@@ -65,3 +65,7 @@ end
 monkeys = Monkey.parse(input)
 after_20_rounds = Monkey.do_rounds(monkeys, 20, &(div(&1, 3)))
 IO.inspect(Monkey.business(after_20_rounds))
+
+modulus = (Tuple.to_list(monkeys) |> Enum.map(&(elem(&1, 4))) |> Enum.product)
+after_10000_rounds = Monkey.do_rounds(monkeys, 10000, &(rem(&1, modulus)))
+IO.inspect(Monkey.business(after_10000_rounds))
