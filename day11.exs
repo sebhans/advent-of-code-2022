@@ -23,25 +23,30 @@ defmodule Monkey do
         fn
           worry_level when rem(worry_level, td) == 0 -> tr
           _ -> fr
-        end
+        end,
+        td
       }
     end) |> Enum.to_list |> List.to_tuple
   end
 
-  def round({monkeys, counts}) do
+  def do_rounds(monkeys, n, manage_worry) do
+    Enum.reduce(1..n,
+      {monkeys, Map.from_keys(Enum.to_list(0..(tuple_size(monkeys)-1)), 0)},
+      fn _, state -> round(state, manage_worry) end)
+  end
+
+  defp round({monkeys, counts}, manage_worry) do
     Enum.reduce(0..tuple_size(monkeys)-1, {monkeys, counts}, fn i, {monkeys, counts} ->
       monkeys
       |> put_elem(i, put_elem(elem(monkeys, i), 1, []))
-      |> monkey_around(elem(monkeys, i), counts)
-      |> log
+      |> monkey_around(elem(monkeys, i), counts, manage_worry)
     end)
   end
 
-  defp monkey_around(monkeys, {id, items, inspect, sling}, counts) do
+  defp monkey_around(monkeys, {id, items, inspect, sling, _}, counts, manage_worry) do
     throw_item = &(put_elem(&3, &1, put_elem(elem(&3, &1), 1, elem(elem(&3, &1), 1) ++ [&2])))
     Enum.reduce(items, {monkeys, counts}, fn item, {monkeys, counts} ->
-      updated_item = (item |> inspect.() |> div(3))
-      IO.puts("Monkey #{id}, item #{item} -> #{updated_item}")
+      updated_item = (item |> inspect.() |> manage_worry.())
       {
         throw_item.(sling.(updated_item), updated_item, monkeys),
         update_in(counts, [id], &(&1 + 1))
@@ -49,26 +54,14 @@ defmodule Monkey do
     end)
   end
 
-  defp log({id, items, inspect, sling}) do
-    IO.write("Monkey #{id}:")
-    Enum.each(items, &(IO.write(" #{&1}")))
-    IO.write("\n")
-    {id, items, inspect, sling}
-  end
-  defp log({monkeys, counts}) do
-    Enum.each(Tuple.to_list(monkeys), &log/1)
-    IO.write("Counts: ")
-    IO.inspect(counts)
-    {monkeys, counts}
+  def business({_, counts}) do
+    Map.values(counts)
+    |> Enum.sort(&(&1 >= &2))
+    |> Enum.take(2)
+    |> Enum.product
   end
 end
 
 monkeys = Monkey.parse(input)
-{_, counts} = Enum.reduce(1..20,
-  {monkeys, Map.from_keys(Enum.to_list(0..(tuple_size(monkeys)-1)), 0)},
-  fn _, state -> Monkey.round(state) end)
-monkey_business = (Map.values(counts)
-|> Enum.sort(&(&1 >= &2))
-|> Enum.take(2)
-|> Enum.product)
-IO.inspect(monkey_business)
+after_20_rounds = Monkey.do_rounds(monkeys, 20, &(div(&1, 3)))
+IO.inspect(Monkey.business(after_20_rounds))
