@@ -52,8 +52,22 @@ defmodule Climbing do
   defp at(map, {x, y}) do
     elem(elem(map, y), x)
   end
+
+  def find_possible_starting_positions(map) do
+    Enum.flat_map(0..(tuple_size(map)-1), fn y ->
+      Enum.map(0..(tuple_size(elem(map, 0))-1), fn x -> {x, y} end)
+    end)
+    |> Enum.filter(fn p -> at(map, p) == ?a end)
+  end
 end
 
-Climbing.parse_map(input)
-|> Climbing.scout
+{map, start, goal} = Climbing.parse_map(input)
+Climbing.scout({map, start, goal})
+|> IO.inspect
+
+Climbing.find_possible_starting_positions(map)
+|> Enum.reduce(:infinity, fn start, fewest_steps ->
+  steps = Climbing.scout({map, start, goal})
+  min(fewest_steps, steps)
+end)
 |> IO.inspect
