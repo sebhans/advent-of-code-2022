@@ -22,8 +22,24 @@ defmodule Sensors do
   defp min_x([sx, _, _, _, d]), do: sx - d
   defp max_x([sx, _, _, _, d]), do: sx + d
 
-  def empty?(sensors, x, y) do
-    Enum.any?(sensors, fn [sx, sy, bx, by, d] -> (x != bx or y != by) and manhattan_distance(sx, sy, x, y) <= d end)
+  def empty?(sensors, x, y), do: in_range?(sensors, x, y) and not beacon?(sensors, x, y)
+
+  def in_range?(sensors, x, y) do
+    Enum.any?(sensors, fn [sx, sy, _, _, d] -> manhattan_distance(sx, sy, x, y) <= d end)
+  end
+
+  def beacon?(sensors, x, y) do
+    Enum.any?(sensors, fn [_, _, bx, by, _] -> x == bx and y == by end)
+  end
+
+  def tuning_frequency({x, y}), do: x * 4000000 + y
+
+  def just_out_of_range([sx, sy, _, _, d]) do
+    Stream.flat_map(1..(d+1), fn dx -> [
+      {sx-dx, sy-(d+1-dx)},
+      {sx-dx+1, sy+d-dx+2},
+      {sx+dx, sy+d+1-dx},
+      {sx+dx-1, sy-d+dx-2}] end)
   end
 end
 
@@ -31,3 +47,11 @@ sensors = (Sensors.parse(input)
   |> Sensors.add_beacon_distance)
 {min_x, max_x} = Sensors.min_max_x(sensors)
 IO.inspect(min_x..max_x |> Enum.count(fn x -> Sensors.empty?(sensors, x, 2000000) end))
+
+IO.inspect(
+  Stream.flat_map(sensors, fn sensor ->
+    Sensors.just_out_of_range(sensor)
+    |> Stream.reject(fn {x, y} -> x < 0 or x > 4000000 or y < 0 or y > 4000000 or Sensors.in_range?(sensors, x, y) end)
+  end)
+  |> Enum.at(0)
+  |> Sensors.tuning_frequency)
