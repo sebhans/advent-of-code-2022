@@ -32,3 +32,18 @@ end)
 |> Enum.max_by(fn {_, _, _, released} -> released end)
 |> elem(3)
 |> IO.inspect
+
+Enum.reduce(1..26, [{"AA", "AA", MapSet.new(), 0, 0}], fn _, paths ->
+  Enum.flat_map(paths, fn {my_position, elephant_position, open, total_rate, released} ->
+    Enum.flat_map(move.({my_position, open, total_rate, released}), fn {my_position, open, total_rate, released} ->
+      Enum.map(move.({elephant_position, open, total_rate, released}), fn {elephant_position, open, total_rate, _} ->
+        {my_position, elephant_position, open, total_rate, released}
+      end)
+    end)
+  end)
+  |> Enum.sort_by(fn {mp, ep, _, total_rate, released} -> {min(mp, ep), max(mp, ep), total_rate, released} end, &>=/2)
+  |> Enum.dedup_by(fn {mp, ep, _, total_rate, _} -> {min(mp, ep), max(mp, ep), total_rate} end)
+end)
+|> Enum.max_by(fn {_, _, _, _, released} -> released end)
+|> elem(4)
+|> IO.inspect
